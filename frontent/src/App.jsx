@@ -1,23 +1,42 @@
-// eslint-disable-next-line no-unused-vars
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import React, { useState } from "react";
 import axios from "axios";
 
 const App = () => {
-  const { data, error, isLoading, isError } = useQuery({
+  const [showusers, setshowusers] = useState(false);
+
+  const { data, error, isLoading, isError, isSuccess } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
-      const responsice = await axios("http://localhost:3000/users");
-
-      return responsice.data;
+      const response = await axios("http://localhost:3000/users");
+      return response.data;
     },
+    // API call will only trigger when showusers is true
+    enabled: showusers,
   });
 
-  console.log("user data=", data);
+  if (isSuccess) {
+    console.log("user data=", data);
+  }
+
+  if (isLoading) {
+    return (
+      <>
+        <h1>Loading</h1>
+      </>
+    );
+  }
 
   return (
     <div>
-      <h1>home</h1>
+      <h1>Home</h1>
+      <button onClick={() => setshowusers(true)}>Get Users</button>
+      {isError && <p>Error: {error.message}</p>}
+      <ul>
+        {data?.map((user) => (
+          <li key={user.id}>{user.name}</li>
+        ))}
+      </ul>
     </div>
   );
 };
